@@ -56,7 +56,7 @@ export const Search: React.FC<SearchProps> = ({ notes, onSelect, isScrolled }) =
       <button
         onClick={() => setIsOpen(true)}
         className={cn(
-          "flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg transition-all duration-300 text-sm border border-slate-200",
+          "flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-lg transition-all duration-300 text-sm border border-slate-200 dark:border-slate-700",
           isScrolled ? "p-2 md:px-3 md:py-1.5" : "px-3 py-1.5"
         )}
       >
@@ -68,7 +68,7 @@ export const Search: React.FC<SearchProps> = ({ notes, onSelect, isScrolled }) =
           搜索笔记...
         </span>
         {!isScrolled && (
-          <kbd className="ml-4 px-1.5 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-sans font-medium text-slate-400 hidden lg:block">
+          <kbd className="ml-4 px-1.5 py-0.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded text-[10px] font-sans font-medium text-slate-400 dark:text-slate-500 hidden lg:block">
             ⌘K
           </kbd>
         )}
@@ -89,21 +89,21 @@ export const Search: React.FC<SearchProps> = ({ notes, onSelect, isScrolled }) =
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden"
+              className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
             >
-              <div className="flex items-center p-4 border-b border-slate-100">
-                <SearchIcon className="text-slate-400 mr-3" size={20} />
+              <div className="flex items-center p-4 border-b border-slate-100 dark:border-slate-800">
+                <SearchIcon className="text-slate-400 dark:text-slate-500 mr-3" size={20} />
                 <input
                   ref={inputRef}
                   type="text"
                   placeholder="搜索标题、内容、标签..."
-                  className="flex-1 bg-transparent border-none outline-none text-slate-800 placeholder:text-slate-400 text-lg"
+                  className="flex-1 bg-transparent border-none outline-none text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-600 text-lg"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-slate-100 rounded-md text-slate-400"
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md text-slate-400 dark:text-slate-500"
                 >
                   <X size={20} />
                 </button>
@@ -120,36 +120,36 @@ export const Search: React.FC<SearchProps> = ({ notes, onSelect, isScrolled }) =
                           setIsOpen(false);
                           setQuery('');
                         }}
-                        className="w-full flex items-center justify-between p-3 hover:bg-indigo-50 rounded-xl transition-colors group"
+                        className="w-full flex items-center justify-between p-3 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-colors group"
                       >
                         <div className="flex items-center gap-3 text-left">
-                          <div className="w-10 h-10 bg-slate-100 group-hover:bg-indigo-100 rounded-lg flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+                          <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/40 rounded-lg flex items-center justify-center text-slate-400 dark:text-slate-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
                             <FileText size={20} />
                           </div>
                           <div>
-                            <div className="text-slate-900 font-medium">{note.title}</div>
-                            <div className="text-slate-400 text-xs">{note.path}</div>
+                            <div className="text-slate-900 dark:text-slate-100 font-medium">{note.title}</div>
+                            <div className="text-slate-400 dark:text-slate-500 text-xs">{note.path}</div>
                           </div>
                         </div>
-                        <CornerDownLeft size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CornerDownLeft size={16} className="text-slate-300 dark:text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
                   </div>
                 ) : query ? (
-                  <div className="py-12 text-center text-slate-400">
+                  <div className="py-12 text-center text-slate-400 dark:text-slate-600">
                     没有找到匹配的笔记
                   </div>
                 ) : (
-                  <div className="py-12 text-center text-slate-400">
+                  <div className="py-12 text-center text-slate-400 dark:text-slate-600">
                     输入内容开始搜索...
                   </div>
                 )}
               </div>
               
-              <div className="p-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+              <div className="p-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-bold">
                 <div className="flex gap-4">
-                  <span><kbd className="bg-white px-1 rounded border border-slate-200">ESC</kbd> 关闭</span>
-                  <span><kbd className="bg-white px-1 rounded border border-slate-200">ENTER</kbd> 选择</span>
+                  <span><kbd className="bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">ESC</kbd> 关闭</span>
+                  <span><kbd className="bg-white dark:bg-slate-800 px-1 rounded border border-slate-200 dark:border-slate-700">ENTER</kbd> 选择</span>
                 </div>
                 <div>{results.length} 个结果</div>
               </div>

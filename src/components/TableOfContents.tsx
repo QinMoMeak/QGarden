@@ -57,7 +57,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
 
   return (
     <nav className="hidden xl:block sticky top-32 w-64 ml-12 shrink-0 self-start">
-      <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">目录</h4>
+      <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">目录</h4>
       <ul className="space-y-3">
         {headings.map((heading) => (
           <li 
@@ -73,8 +73,8 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
               className={cn(
                 "text-sm transition-all duration-200 block border-l-2 py-0.5 pl-3",
                 activeId === heading.id
-                  ? "text-indigo-600 border-indigo-600 font-medium"
-                  : "text-slate-400 border-transparent hover:text-slate-600 hover:border-slate-200"
+                  ? "text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 font-medium"
+                  : "text-slate-400 dark:text-slate-500 border-transparent hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-200 dark:hover:border-slate-700"
               )}
             >
               {heading.text}
