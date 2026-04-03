@@ -66,7 +66,9 @@ export default function App() {
   return (
     <div className={cn(
       "min-h-screen font-sans selection:bg-indigo-100 dark:selection:bg-indigo-900 selection:text-indigo-900 dark:selection:text-indigo-100 transition-colors duration-300",
-      isDarkMode ? "dark bg-slate-950 text-slate-50" : "bg-white text-slate-900"
+      isDarkMode
+        ? "dark bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.12),_transparent_32%),linear-gradient(180deg,_#060816_0%,_#0b1020_100%)] text-slate-50"
+        : "bg-white text-slate-900"
     )}>
       {/* Header Wrapper */}
       <div className="fixed top-0 left-0 w-full z-50 pointer-events-none flex justify-center">
@@ -80,9 +82,13 @@ export default function App() {
             paddingLeft: isScrolled ? '16px' : '32px',
             paddingRight: isScrolled ? '16px' : '32px',
             backgroundColor: isScrolled 
-              ? (isDarkMode ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)')
-              : (isDarkMode ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)'),
-            boxShadow: isScrolled ? '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' : 'none',
+              ? (isDarkMode ? 'rgba(10, 15, 29, 0.94)' : 'rgba(255, 255, 255, 0.9)')
+              : (isDarkMode ? 'rgba(8, 12, 24, 0.82)' : 'rgba(255, 255, 255, 0.8)'),
+            boxShadow: isScrolled
+              ? (isDarkMode
+                  ? '0 18px 50px -24px rgba(15, 23, 42, 0.85)'
+                  : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)')
+              : 'none',
             borderWidth: isScrolled ? '1px' : '0px',
             borderBottomWidth: isScrolled ? '1px' : '1px',
           }}
@@ -100,10 +106,10 @@ export default function App() {
                 <LayoutGrid size={16} />
               </div>
               <span className={cn(
-                "font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap transition-all duration-300",
+                "font-bold text-slate-900 dark:text-slate-200 whitespace-nowrap transition-all duration-300",
                 isScrolled ? "w-0 opacity-0 overflow-hidden lg:w-auto lg:opacity-100" : "w-auto opacity-100"
               )}>
-                Obsidian Garden
+                QGarden
               </span>
             </button>
             
@@ -112,7 +118,7 @@ export default function App() {
                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 md:mx-2" />
                 <button 
                   onClick={view === 'note' ? handleBackToCategory : handleGoHome}
-                  className="flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors whitespace-nowrap"
                 >
                   <ChevronLeft size={16} />
                   <span className={cn(
@@ -131,18 +137,18 @@ export default function App() {
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors"
             >
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors hidden sm:flex">
+            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors hidden sm:flex">
               <Share2 size={18} />
             </button>
             <a 
               href="https://github.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors"
             >
               <Github size={18} />
             </a>
@@ -199,13 +205,13 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 mt-20">
+      <footer className="mt-20 border-t border-slate-100 bg-slate-50/50 py-12 dark:border-slate-800/80 dark:bg-slate-950/90">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-slate-200 dark:bg-slate-800 rounded-lg" />
-            <span className="text-sm font-bold text-slate-400 dark:text-slate-500">Obsidian Garden</span>
+            <div className="w-6 h-6 rounded-lg border border-transparent bg-slate-200 dark:border-slate-700/80 dark:bg-slate-800/90" />
+            <span className="text-sm font-bold text-slate-400 dark:text-slate-300">QGarden</span>
           </div>
-          <div className="flex gap-8 text-sm text-slate-400 dark:text-slate-500">
+          <div className="flex gap-8 text-sm text-slate-400 dark:text-slate-400">
             <button onClick={handleGoHome} className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">首页</button>
             <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">关于</a>
             <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">归档</a>

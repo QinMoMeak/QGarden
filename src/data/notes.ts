@@ -1,6 +1,7 @@
 import { Note } from '../types';
+import { INTERVIEW_VAULT_NOTES } from './interviewNotes';
 
-export const SAMPLE_NOTES: Note[] = [
+const STATIC_NOTES: Note[] = [
   {
     id: 'intro',
     title: '欢迎来到我的数字花园',
@@ -58,31 +59,6 @@ const [count, setCount] = useState(0);
     `
   },
   {
-    id: 'interview-js',
-    title: 'JS 闭包面试题',
-    path: '02-面试/JS/闭包',
-    category: '面试',
-    tags: ['javascript', 'interview'],
-    lastModified: '2024-03-22T09:00:00Z',
-    content: `
-# 面试逐字稿：什么是闭包？
-
-**面试官**: 请解释一下 JavaScript 中的闭包。
-
-**我**: 闭包是指有权访问另一个函数作用域中变量的函数。
-
-### 核心要点
-1. **函数嵌套**: 一个函数内部定义了另一个函数。
-2. **变量引用**: 内部函数引用了外部函数的变量。
-3. **生命周期**: 外部函数执行完毕后，其作用域链仍被内部函数引用，不会被销毁。
-
-### 实际应用
-- 私有变量
-- 柯里化
-- 模块化
-    `
-  },
-  {
     id: 'diary-2024',
     title: '2024年春天的第一场雨',
     path: '03-日记/2024/春天',
@@ -132,3 +108,5 @@ const [count, setCount] = useState(0);
     coverImage: 'https://picsum.photos/seed/alive/800/400'
   }
 ];
+
+export const SAMPLE_NOTES: Note[] = [...STATIC_NOTES, ...INTERVIEW_VAULT_NOTES];

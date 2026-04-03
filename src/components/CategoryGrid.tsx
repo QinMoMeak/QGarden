@@ -16,6 +16,8 @@ const CATEGORIES = [
     color: 'bg-blue-500', 
     lightColor: 'bg-blue-50',
     textColor: 'text-blue-600',
+    darkLightColor: 'dark:bg-blue-500/12',
+    darkTextColor: 'dark:text-blue-300',
     description: '技术难点、框架学习与源码解析'
   },
   { 
@@ -25,6 +27,8 @@ const CATEGORIES = [
     color: 'bg-indigo-500', 
     lightColor: 'bg-indigo-50',
     textColor: 'text-indigo-600',
+    darkLightColor: 'dark:bg-indigo-500/12',
+    darkTextColor: 'dark:text-indigo-300',
     description: '整理的面试回答与高频考点'
   },
   { 
@@ -34,6 +38,8 @@ const CATEGORIES = [
     color: 'bg-emerald-500', 
     lightColor: 'bg-emerald-50',
     textColor: 'text-emerald-600',
+    darkLightColor: 'dark:bg-emerald-500/12',
+    darkTextColor: 'dark:text-emerald-300',
     description: '触动心灵的文字与文学收藏'
   },
   { 
@@ -43,6 +49,8 @@ const CATEGORIES = [
     color: 'bg-rose-500', 
     lightColor: 'bg-rose-50',
     textColor: 'text-rose-600',
+    darkLightColor: 'dark:bg-rose-500/12',
+    darkTextColor: 'dark:text-rose-300',
     description: '生活感悟、碎碎念与日常点滴'
   },
 ];
@@ -54,7 +62,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onCategorySelect }) 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-block px-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-sm font-medium mb-6"
+          className="mb-6 inline-block rounded-full border border-indigo-200/80 bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-600 dark:border-indigo-400/20 dark:bg-indigo-500/12 dark:text-indigo-200"
         >
           欢迎来到我的数字花园
         </motion.div>
@@ -62,7 +70,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onCategorySelect }) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-6"
+          className="mb-6 text-5xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100"
         >
           探索知识的边界
         </motion.h1>
@@ -70,7 +78,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onCategorySelect }) 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto"
+          className="mx-auto max-w-2xl text-xl text-slate-500 dark:text-slate-300"
         >
           这里记录了我的学习历程、面试心得、收藏的小说以及日常随笔。
         </motion.p>
@@ -84,19 +92,19 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onCategorySelect }) 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * idx + 0.3 }}
             onClick={() => onCategorySelect(cat.id)}
-            className="group relative p-8 rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-2xl hover:shadow-indigo-500/10 dark:hover:shadow-indigo-500/5 transition-all duration-500 overflow-hidden cursor-pointer"
+            className="group relative cursor-pointer overflow-hidden rounded-3xl border border-slate-100 bg-white p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 dark:border-slate-800/80 dark:bg-slate-900/82 dark:shadow-[0_18px_45px_-32px_rgba(15,23,42,0.95)] dark:hover:border-slate-700 dark:hover:shadow-[0_24px_60px_-32px_rgba(79,70,229,0.28)]"
           >
-            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110", cat.lightColor, "dark:bg-indigo-900/20")}>
-              <cat.icon className={cn(cat.textColor, "dark:text-indigo-400")} size={28} />
+            <div className={cn("mb-6 flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:scale-110", cat.lightColor, cat.darkLightColor)}>
+              <cat.icon className={cn(cat.textColor, cat.darkTextColor)} size={28} />
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-3">{cat.name}</h3>
-            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6">
+            <p className="mb-6 text-sm leading-relaxed text-slate-500 dark:text-slate-300">
               {cat.description}
             </p>
-            <div className="flex items-center text-sm font-bold text-indigo-600 dark:text-indigo-400">
+            <div className="flex items-center text-sm font-bold text-indigo-600 dark:text-slate-100">
               查看全部 <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
             </div>
-            <div className={cn("absolute top-0 right-0 w-32 h-32 opacity-[0.03] dark:opacity-[0.08] -mr-8 -mt-8 rounded-full", cat.color)} />
+            <div className={cn("absolute top-0 right-0 -mr-8 -mt-8 h-32 w-32 rounded-full opacity-[0.03] dark:opacity-[0.11]", cat.color)} />
           </motion.div>
         ))}
       </div>

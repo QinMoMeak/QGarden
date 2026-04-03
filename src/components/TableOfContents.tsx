@@ -56,7 +56,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => 
   if (headings.length === 0) return null;
 
   return (
-    <nav className="hidden xl:block sticky top-32 w-64 ml-12 shrink-0 self-start">
+    <nav className="hidden xl:block sticky top-28 w-52 ml-6 shrink-0 self-start">
       <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">目录</h4>
       <ul className="space-y-3">
         {headings.map((heading) => (

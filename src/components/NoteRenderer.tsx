@@ -55,7 +55,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
         />
       </div>
 
-      <div className="max-w-7xl mx-auto flex justify-center px-6">
+      <div className="mx-auto flex max-w-[84rem] justify-center px-6 xl:pr-4">
         <div className="flex-1 max-w-3xl py-12 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <header className="mb-12">
             <div className="flex items-center justify-between mb-8">
@@ -63,30 +63,41 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
                 <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-full">{note.category}</span>
               </div>
               <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors">
+                <button className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80">
                   <Bookmark size={18} />
                 </button>
-                <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full text-slate-400 dark:text-slate-500 transition-colors">
+                <button className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80">
                   <Share2 size={18} />
                 </button>
               </div>
             </div>
 
+            {note.coverImage && (
+              <div className="mb-8 overflow-hidden rounded-[2rem] border border-slate-200/70 bg-slate-100 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900">
+                <img
+                  src={note.coverImage}
+                  alt={`${note.title} cover`}
+                  className="h-full max-h-[28rem] min-h-56 w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 leading-tight">
               {note.title}
             </h1>
             
-            <div className="flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400 border-y border-slate-100 dark:border-slate-800 py-6">
+            <div className="flex flex-wrap items-center gap-6 border-y border-slate-100 py-6 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-300">
               <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-slate-300 dark:text-slate-600" />
+                <Calendar size={16} className="text-slate-300 dark:text-slate-500" />
                 <span>发布于 {format(new Date(note.lastModified), 'yyyy年MM月dd日')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock size={16} className="text-slate-300 dark:text-slate-600" />
+                <Clock size={16} className="text-slate-300 dark:text-slate-500" />
                 <span>阅读时间约 5 分钟</span>
               </div>
               <div className="flex items-center gap-2">
-                <Tag size={16} className="text-slate-300 dark:text-slate-600" />
+                <Tag size={16} className="text-slate-300 dark:text-slate-500" />
                 <div className="flex gap-2">
                   {note.tags.map(tag => (
                     <span key={tag} className="hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer transition-colors">#{tag}</span>
@@ -131,11 +142,11 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
                   <button
                     key={n.id}
                     onClick={() => onNoteSelect(n.id)}
-                    className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all text-left group"
+                    className="group rounded-2xl border border-slate-100 bg-white p-6 text-left transition-all hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 dark:border-slate-800/80 dark:bg-slate-900/75 dark:hover:border-indigo-500/25 dark:hover:shadow-[0_20px_50px_-30px_rgba(79,70,229,0.22)]"
                   >
                     <div className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest mb-2">{n.category}</div>
                     <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors mb-2">{n.title}</h4>
-                    <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                    <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-400">
                       <Calendar size={12} />
                       <span>{format(new Date(n.lastModified), 'yyyy-MM-dd')}</span>
                     </div>
@@ -148,14 +159,14 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
           <footer className="mt-20 pt-12 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-6">
             <button 
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex items-center gap-2 text-sm font-bold text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
+              className="group flex items-center gap-2 text-sm font-bold text-slate-400 transition-colors hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-300"
             >
               <div className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center group-hover:border-indigo-200 dark:group-hover:border-indigo-900/50 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20 transition-all">
                 <ArrowLeft size={14} className="rotate-90" />
               </div>
               回到顶部
             </button>
-            <div className="text-slate-400 dark:text-slate-500 text-xs font-mono bg-slate-50 dark:bg-slate-900/50 px-3 py-1.5 rounded-full">
+            <div className="rounded-full bg-slate-50 px-3 py-1.5 text-xs font-mono text-slate-400 dark:bg-slate-900 dark:text-slate-400">
               Vault Path: {note.path}
             </div>
           </footer>

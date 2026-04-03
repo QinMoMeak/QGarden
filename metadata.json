@@ -1,5 +1,5 @@
 {
-  "name": "Obsidian Garden",
-  "description": "A personal knowledge base and digital garden powered by Obsidian-style markdown notes.",
+  "name": "QGarden",
+  "description": "A digital garden that renders Obsidian-style Markdown notes into a searchable website.",
   "requestFramePermissions": []
 }
