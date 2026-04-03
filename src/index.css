@@ -8,6 +8,7 @@
 @layer base {
   html {
     @apply bg-white;
+    scrollbar-width: none;
   }
 
   html.dark {
@@ -16,6 +17,7 @@
 
   body {
     @apply bg-white text-slate-900 antialiased transition-colors duration-300;
+    scrollbar-width: none;
   }
   .dark body {
     background: transparent;
@@ -25,6 +27,20 @@
 }
 
 @layer utilities {
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }

@@ -109,7 +109,7 @@ export const Search: React.FC<SearchProps> = ({ notes, onSelect, isScrolled }) =
                 </button>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto p-2">
+              <div className="scrollbar-hidden max-h-[60vh] overflow-y-auto p-2">
                 {results.length > 0 ? (
                   <div className="space-y-1">
                     {results.map((note) => (
