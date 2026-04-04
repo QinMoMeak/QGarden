@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Note } from '../types';
@@ -7,6 +8,7 @@ import { format } from 'date-fns';
 import { Calendar, Tag, Clock, ArrowLeft, ArrowRight, Share2, Bookmark } from 'lucide-react';
 import { TableOfContents } from './TableOfContents';
 import { SAMPLE_NOTES } from '../data/notes';
+import { extractMarkdownHeadings, slugifyHeading } from '../lib/headings';
 
 interface NoteRendererProps {
   note: Note;
@@ -33,12 +35,33 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
     });
   };
 
-  // Custom heading renderer to add IDs for TOC
-  const HeadingRenderer = ({ level, children }: { level: number, children?: React.ReactNode }) => {
-    const text = React.Children.toArray(children).join('');
-    const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-');
+  const processedContent = useMemo(() => processContent(note.content), [note.content]);
+  const headingDefinitions = useMemo(() => extractMarkdownHeadings(processedContent), [processedContent]);
+
+  const HeadingRenderer = ({
+    level,
+    children,
+    node,
+  }: {
+    level: number;
+    children?: React.ReactNode;
+    node?: { position?: { start?: { line?: number } } };
+  }) => {
+    const text = React.Children.toArray(children).join('').trim();
+    const line = node?.position?.start?.line;
+    const matchedHeading = headingDefinitions.find((heading) => (
+      heading.level === level && heading.line === line
+    ));
+    const id = matchedHeading?.id ?? slugifyHeading(text);
+
     const Tag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
     return <Tag id={id}>{children}</Tag>;
+  };
+
+  const markdownComponents: Components = {
+    h1: ({node, ...props}) => <HeadingRenderer level={1} node={node as { position?: { start?: { line?: number } } }} {...props} />,
+    h2: ({node, ...props}) => <HeadingRenderer level={2} node={node as { position?: { start?: { line?: number } } }} {...props} />,
+    h3: ({node, ...props}) => <HeadingRenderer level={3} node={node as { position?: { start?: { line?: number } } }} {...props} />,
   };
 
   const relatedNotes = SAMPLE_NOTES
@@ -83,7 +106,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
               </div>
             )}
 
-            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 leading-tight">
+            <h1 className="reading-title text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight mb-8 leading-tight">
               {note.title}
             </h1>
             
@@ -123,13 +146,9 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]} 
               rehypePlugins={[rehypeRaw]}
-              components={{
-                h1: ({node, ...props}) => <HeadingRenderer level={1} {...props} />,
-                h2: ({node, ...props}) => <HeadingRenderer level={2} {...props} />,
-                h3: ({node, ...props}) => <HeadingRenderer level={3} {...props} />,
-              }}
+              components={markdownComponents}
             >
-              {processContent(note.content)}
+              {processedContent}
             </ReactMarkdown>
           </article>
 
@@ -176,7 +195,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
         </div>
 
         {/* Desktop Sidebar TOC */}
-        <TableOfContents content={note.content} />
+        <TableOfContents headings={headingDefinitions} />
       </div>
     </div>
   );

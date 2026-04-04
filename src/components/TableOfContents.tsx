@@ -1,62 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { Note } from '../types';
 import { cn } from '../lib/utils';
-
-interface TOCItem {
-  id: string;
-  text: string;
-  level: number;
-}
+import type { ParsedHeading } from '../lib/headings';
 
 interface TableOfContentsProps {
-  content: string;
+  headings: ParsedHeading[];
 }
 
-export const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
-  const [headings, setHeadings] = useState<TOCItem[]>([]);
+export const TableOfContents: React.FC<TableOfContentsProps> = ({ headings }) => {
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
-    const lines = content.split('\n');
-    const extractedHeadings: TOCItem[] = [];
-    
-    lines.forEach((line) => {
-      const match = line.match(/^(#{1,3})\s+(.*)/);
-      if (match) {
-        const level = match[1].length;
-        const text = match[2].trim();
-        const id = text.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-');
-        extractedHeadings.push({ id, text, level });
-      }
-    });
-    
-    setHeadings(extractedHeadings);
-  }, [content]);
+    if (headings.length === 0) {
+      setActiveId('');
+      return;
+    }
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
+    const getCurrentHeading = () => {
+      const viewportAnchor = 180;
+      const visibleCandidates: Array<{ id: string; level: number; top: number }> = [];
+      const passedCandidates: Array<{ id: string; level: number; top: number }> = [];
+
+      headings.forEach((heading) => {
+        const el = document.getElementById(heading.id);
+        if (!el) return;
+
+        const rect = el.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+
+        if (rect.top <= viewportAnchor && rect.bottom > 0) {
+          visibleCandidates.push({ id: heading.id, level: heading.level, top: rect.top });
+        }
+
+        if (absoluteTop <= window.scrollY + viewportAnchor) {
+          passedCandidates.push({ id: heading.id, level: heading.level, top: absoluteTop });
+        }
+      });
+
+      if (visibleCandidates.length > 0) {
+        visibleCandidates.sort((a, b) => {
+          if (b.level !== a.level) return b.level - a.level;
+          return Math.abs(a.top) - Math.abs(b.top);
         });
-      },
-      { rootMargin: '0% 0% -80% 0%' }
-    );
+        setActiveId(visibleCandidates[0].id);
+        return;
+      }
 
-    headings.forEach((heading) => {
-      const el = document.getElementById(heading.id);
-      if (el) observer.observe(el);
-    });
+      if (passedCandidates.length > 0) {
+        passedCandidates.sort((a, b) => {
+          if (b.top !== a.top) return b.top - a.top;
+          return b.level - a.level;
+        });
+        setActiveId(passedCandidates[0].id);
+        return;
+      }
 
-    return () => observer.disconnect();
+      setActiveId(headings[0]?.id ?? '');
+    };
+
+    getCurrentHeading();
+    window.addEventListener('scroll', getCurrentHeading, { passive: true });
+    window.addEventListener('resize', getCurrentHeading);
+
+    return () => {
+      window.removeEventListener('scroll', getCurrentHeading);
+      window.removeEventListener('resize', getCurrentHeading);
+    };
   }, [headings]);
 
   if (headings.length === 0) return null;
 
   return (
-    <nav className="hidden xl:block sticky top-28 w-52 ml-6 shrink-0 self-start">
+    <nav className="scrollbar-hidden fixed right-6 top-24 z-30 hidden max-h-[calc(100vh-7.5rem)] w-44 overflow-y-auto rounded-2xl border border-slate-200/70 bg-white/88 p-4 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.18)] backdrop-blur-md xl:block dark:border-slate-800/80 dark:bg-slate-950/78 dark:shadow-[0_24px_60px_-34px_rgba(2,6,23,0.78)]">
       <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">目录</h4>
       <ul className="space-y-3">
         {headings.map((heading) => (

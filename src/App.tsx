@@ -7,11 +7,16 @@ import { SAMPLE_NOTES } from './data/notes';
 import { Github, Share2, Home, ChevronLeft, LayoutGrid, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './lib/utils';
+import { AppRouteState, buildUrlForRoute, getHomeRoute, resolveRouteFromSearch } from './lib/navigation';
 
 export default function App() {
-  const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [view, setView] = useState<'home' | 'category' | 'note'>('home');
+  const [route, setRoute] = useState<AppRouteState>(() => {
+    if (typeof window === 'undefined') {
+      return getHomeRoute();
+    }
+
+    return resolveRouteFromSearch(window.location.search, SAMPLE_NOTES);
+  });
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -20,6 +25,8 @@ export default function App() {
     }
     return false;
   });
+
+  const { activeNoteId, activeCategory, view } = route;
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
@@ -33,6 +40,16 @@ export default function App() {
   const activeNote = SAMPLE_NOTES.find(n => n.id === activeNoteId);
 
   useEffect(() => {
+    const handlePopState = () => {
+      setRoute(resolveRouteFromSearch(window.location.search, SAMPLE_NOTES));
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -40,27 +57,52 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const navigateToRoute = (nextRoute: AppRouteState, scrollBehavior: ScrollBehavior = 'smooth') => {
+    const nextUrl = buildUrlForRoute(nextRoute);
+    const currentUrl = `${window.location.pathname}${window.location.search}`;
+
+    if (currentUrl !== nextUrl) {
+      window.history.pushState({}, '', nextUrl);
+    }
+
+    setRoute(nextRoute);
+    window.scrollTo({ top: 0, behavior: scrollBehavior });
+  };
+
   const handleNoteSelect = (id: string) => {
-    setActiveNoteId(id);
-    setView('note');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const note = SAMPLE_NOTES.find((item) => item.id === id);
+    if (!note) return;
+
+    navigateToRoute({
+      view: 'note',
+      activeNoteId: note.id,
+      activeCategory: note.category,
+    });
   };
 
   const handleCategorySelect = (category: string) => {
-    setActiveCategory(category);
-    setView('category');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigateToRoute({
+      view: 'category',
+      activeCategory: category,
+      activeNoteId: null,
+    });
   };
 
   const handleGoHome = () => {
-    setView('home');
-    setActiveNoteId(null);
-    setActiveCategory(null);
+    navigateToRoute(getHomeRoute());
   };
 
   const handleBackToCategory = () => {
-    if (activeCategory) setView('category');
-    else setView('home');
+    if (activeCategory) {
+      navigateToRoute({
+        view: 'category',
+        activeCategory,
+        activeNoteId: null,
+      });
+      return;
+    }
+
+    navigateToRoute(getHomeRoute());
   };
 
   return (
@@ -70,33 +112,15 @@ export default function App() {
         ? "dark bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.12),_transparent_32%),linear-gradient(180deg,_#060816_0%,_#0b1020_100%)] text-slate-50"
         : "bg-white text-slate-900"
     )}>
-      {/* Header Wrapper */}
-      <div className="fixed top-0 left-0 w-full z-50 pointer-events-none flex justify-center">
-        <motion.header 
-          initial={false}
-          animate={{
-            width: isScrolled ? 'auto' : '100%',
-            maxWidth: isScrolled ? '90%' : '100%',
-            marginTop: isScrolled ? '16px' : '0px',
-            borderRadius: isScrolled ? '9999px' : '0px',
-            paddingLeft: isScrolled ? '16px' : '32px',
-            paddingRight: isScrolled ? '16px' : '32px',
-            backgroundColor: isScrolled 
-              ? (isDarkMode ? 'rgba(10, 15, 29, 0.94)' : 'rgba(255, 255, 255, 0.9)')
-              : (isDarkMode ? 'rgba(8, 12, 24, 0.82)' : 'rgba(255, 255, 255, 0.8)'),
-            boxShadow: isScrolled
-              ? (isDarkMode
-                  ? '0 18px 50px -24px rgba(15, 23, 42, 0.85)'
-                  : '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)')
-              : 'none',
-            borderWidth: isScrolled ? '1px' : '0px',
-            borderBottomWidth: isScrolled ? '1px' : '1px',
-          }}
-          className={cn(
-            "h-14 md:h-16 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md pointer-events-auto transition-all duration-500 border-slate-200/60 dark:border-slate-800/60",
-            isScrolled ? "mx-4" : "border-b"
-          )}
-        >
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 h-14 border-b backdrop-blur-md md:h-16",
+          isDarkMode
+            ? "border-slate-800/60 bg-[rgba(8,12,24,0.88)]"
+            : "border-slate-200/60 bg-[rgba(255,255,255,0.88)]"
+        )}
+      >
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-2 md:gap-4">
             <button
               onClick={handleGoHome}
@@ -105,28 +129,20 @@ export default function App() {
               <div className="w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 group-hover:scale-110 transition-transform shrink-0">
                 <LayoutGrid size={16} />
               </div>
-              <span className={cn(
-                "font-bold text-slate-900 dark:text-slate-200 whitespace-nowrap transition-all duration-300",
-                isScrolled ? "w-0 opacity-0 overflow-hidden lg:w-auto lg:opacity-100" : "w-auto opacity-100"
-              )}>
+              <span className="font-bold text-slate-900 dark:text-slate-200 whitespace-nowrap">
                 QGarden
               </span>
             </button>
-            
+
             {view !== 'home' && (
               <>
                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 md:mx-2" />
-                <button 
+                <button
                   onClick={view === 'note' ? handleBackToCategory : handleGoHome}
                   className="flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors whitespace-nowrap"
                 >
                   <ChevronLeft size={16} />
-                  <span className={cn(
-                    "transition-all duration-300",
-                    isScrolled ? "hidden sm:block" : "block"
-                  )}>
-                    {view === 'note' ? (activeCategory || '返回') : '返回首页'}
-                  </span>
+                  <span>{view === 'note' ? (activeCategory || '返回') : '返回首页'}</span>
                 </button>
               </>
             )}
@@ -135,7 +151,7 @@ export default function App() {
           <div className="flex items-center gap-1 md:gap-3">
             <Search notes={SAMPLE_NOTES} onSelect={handleNoteSelect} isScrolled={isScrolled} />
             <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
-            <button 
+            <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors"
             >
@@ -144,17 +160,17 @@ export default function App() {
             <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors hidden sm:flex">
               <Share2 size={18} />
             </button>
-            <a 
-              href="https://github.com" 
-              target="_blank" 
+            <a
+              href="https://github.com"
+              target="_blank"
               rel="noopener noreferrer"
               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800/80 rounded-lg text-slate-500 dark:text-slate-300 transition-colors"
             >
               <Github size={18} />
             </a>
           </div>
-        </motion.header>
-      </div>
+        </div>
+      </header>
 
       {/* Spacer to prevent content jump */}
       <div className="h-16" />

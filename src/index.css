@@ -1,8 +1,33 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("./assets/fonts/LXGWWenKai-Regular-subset.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("./assets/fonts/LXGWWenKai-Regular-subset.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LXGW WenKai";
+  src: url("./assets/fonts/LXGWWenKai-Regular-subset.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-reading: "LXGW WenKai", "STKaiti", "KaiTi", serif;
 }
 
 @layer base {
@@ -57,6 +82,7 @@
 }
 
 @layer components {
+  .reading-title,
   .garden-prose {
     --garden-bg: #f5f7ff;
     --garden-panel: #edf0ff;
@@ -75,6 +101,7 @@
     letter-spacing: 0.008em;
     word-spacing: 0.02em;
     color: var(--garden-text);
+    font-family: var(--font-reading);
     counter-reset: garden-h2 garden-h3 garden-h4;
   }
 
