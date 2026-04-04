@@ -107,15 +107,18 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
             </div>
           </header>
 
-          <article className="prose prose-slate dark:prose-invert prose-indigo max-w-none 
+          <article className="garden-prose prose prose-slate dark:prose-invert prose-indigo max-w-none 
             prose-headings:font-bold prose-headings:tracking-tight
-            prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-            prose-a:text-indigo-600 dark:prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:underline prose-a:font-medium
-            prose-blockquote:border-l-4 prose-blockquote:border-indigo-500 prose-blockquote:bg-indigo-50/30 dark:prose-blockquote:bg-indigo-900/10 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:not-italic prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300
-            prose-code:text-indigo-600 dark:prose-code:text-indigo-400 prose-code:bg-indigo-50 dark:prose-code:bg-indigo-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none prose-code:font-medium
-            prose-pre:bg-slate-900 dark:prose-pre:bg-slate-800 prose-pre:shadow-2xl prose-pre:rounded-2xl prose-pre:p-6
-            prose-img:rounded-2xl prose-img:shadow-lg
+            prose-h1:text-3xl prose-h2:text-[1.42rem] prose-h3:text-[1.18rem]
+            prose-p:text-slate-600 dark:prose-p:text-slate-300
+            prose-a:text-indigo-600 dark:prose-a:text-indigo-300 prose-a:no-underline hover:prose-a:underline prose-a:font-medium
+            prose-blockquote:not-italic prose-blockquote:text-slate-700 dark:prose-blockquote:text-slate-300
+            prose-code:text-indigo-600 dark:prose-code:text-indigo-300 prose-code:bg-indigo-50 dark:prose-code:bg-indigo-900/20 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none prose-code:font-medium
+            prose-pre:rounded-2xl prose-pre:p-6
+            prose-img:rounded-[1.75rem] prose-img:shadow-[0_22px_60px_-34px_rgba(15,23,42,0.32)]
             prose-li:marker:text-indigo-400
+            prose-hr:my-12
+            prose-table:text-sm
           ">
             <ReactMarkdown 
               remarkPlugins={[remarkGfm]} 

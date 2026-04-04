@@ -55,3 +55,256 @@
     @apply bg-slate-700 hover:bg-slate-600;
   }
 }
+
+@layer components {
+  .garden-prose {
+    --garden-bg: #f5f7ff;
+    --garden-panel: #edf0ff;
+    --garden-panel-strong: #dfe2f1;
+    --garden-border: #c6c9d8;
+    --garden-text: #5e6687;
+    --garden-heading: #202746;
+    --garden-accent: #898ea4;
+    --garden-accent-strong: #293256;
+    --garden-inline-code: #c94922;
+    --garden-code-bg: #edf0ff;
+    --garden-code-block: #202746;
+    --garden-code-text: #f5f7ff;
+    font-size: 1.05rem;
+    line-height: 1.92;
+    letter-spacing: 0.008em;
+    word-spacing: 0.02em;
+    color: var(--garden-text);
+    counter-reset: garden-h2 garden-h3 garden-h4;
+  }
+
+  .dark .garden-prose {
+    --garden-accent: rgb(165 180 252);
+    --garden-accent-soft: rgba(99, 102, 241, 0.12);
+    --garden-border: rgba(51, 65, 85, 0.95);
+    --garden-muted: rgb(203 213 225);
+    --garden-panel: rgba(15, 23, 42, 0.72);
+  }
+
+  .garden-prose > * + * {
+    margin-top: 1.1em;
+  }
+
+  .garden-prose p {
+    color: var(--garden-text);
+    text-wrap: pretty;
+    text-indent: 2em;
+  }
+
+  .garden-prose strong {
+    color: var(--garden-heading);
+    font-weight: 700;
+    background-image: linear-gradient(to top, rgba(137, 142, 164, 0.22), rgba(137, 142, 164, 0.22));
+    background-repeat: no-repeat;
+    background-size: 100% 0.5em;
+    background-position: 0 88%;
+  }
+
+  .dark .garden-prose strong {
+    color: rgb(248 250 252);
+    background-image: linear-gradient(to top, rgba(129, 140, 248, 0.22), rgba(129, 140, 248, 0.22));
+  }
+
+  .garden-prose h1,
+  .garden-prose h2,
+  .garden-prose h3,
+  .garden-prose h4,
+  .garden-prose h5,
+  .garden-prose h6 {
+    color: var(--garden-heading);
+  }
+
+  .garden-prose h2 {
+    counter-increment: garden-h2;
+    counter-reset: garden-h3 garden-h4;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 2.5em;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0 0.65rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--garden-border) 88%, white);
+    letter-spacing: -0.015em;
+  }
+
+  .garden-prose h2::before {
+    content: counter(garden-h2, decimal-leading-zero);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.2rem;
+    height: 2.2rem;
+    padding: 0 0.6rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--garden-panel-strong) 78%, white);
+    border: 1px solid color-mix(in srgb, var(--garden-border) 86%, white);
+    color: var(--garden-accent-strong);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .garden-prose h3 {
+    counter-increment: garden-h3;
+    counter-reset: garden-h4;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    padding-left: 0.9rem;
+    border-left: 3px solid color-mix(in srgb, var(--garden-accent) 64%, white);
+    letter-spacing: -0.012em;
+  }
+
+  .garden-prose h3::before {
+    content: counter(garden-h2) "." counter(garden-h3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 1.6rem;
+    padding: 0 0.5rem;
+    border-radius: 0.5rem;
+    background: color-mix(in srgb, var(--garden-panel) 82%, white);
+    color: var(--garden-accent-strong);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .dark .garden-prose h3 {
+    color: rgb(226 232 240);
+  }
+
+  .garden-prose h4,
+  .garden-prose h5,
+  .garden-prose h6 {
+    margin-top: 1.8em;
+  }
+
+  .garden-prose h4 {
+    counter-increment: garden-h4;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .garden-prose h4::before {
+    content: counter(garden-h2) "." counter(garden-h3) "." counter(garden-h4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.25rem;
+    height: 1.45rem;
+    padding: 0 0.45rem;
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--garden-panel) 68%, white);
+    color: var(--garden-accent);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .dark .garden-prose h4,
+  .dark .garden-prose h5,
+  .dark .garden-prose h6 {
+    color: rgb(203 213 225);
+  }
+
+  .garden-prose ul,
+  .garden-prose ol {
+    padding-left: 1.2rem;
+  }
+
+  .garden-prose ul > li,
+  .garden-prose ol > li {
+    margin: 0.55rem 0;
+    padding-left: 0.35rem;
+    color: var(--garden-text);
+  }
+
+  .garden-prose ul > li::marker {
+    color: var(--garden-accent-strong);
+  }
+
+  .garden-prose ol > li::marker {
+    color: color-mix(in srgb, var(--garden-accent-strong) 84%, transparent);
+    font-weight: 700;
+  }
+
+  .garden-prose hr {
+    margin: 2.75rem 0;
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, color-mix(in srgb, var(--garden-border) 92%, white), transparent);
+  }
+
+  .garden-prose blockquote {
+    border-left-width: 0;
+    border: 1px solid color-mix(in srgb, var(--garden-border) 92%, white);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--garden-panel) 78%, white);
+    box-shadow: none;
+  }
+
+  .garden-prose :not(pre) > code {
+    border: 1px solid color-mix(in srgb, var(--garden-border) 86%, white);
+    background: var(--garden-code-bg);
+    color: var(--garden-inline-code);
+    font-size: 0.92em;
+    font-weight: 600;
+  }
+
+  .garden-prose pre {
+    border: 1px solid color-mix(in srgb, var(--garden-border) 78%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--garden-code-block) 96%, white), var(--garden-code-block));
+    color: var(--garden-code-text);
+    box-shadow: 0 22px 50px -38px rgba(32, 39, 70, 0.5);
+  }
+
+  .garden-prose table {
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid color-mix(in srgb, var(--garden-border) 86%, white);
+    border-radius: 1rem;
+  }
+
+  .garden-prose thead {
+    background: color-mix(in srgb, var(--garden-panel-strong) 72%, white);
+  }
+
+  .garden-prose th,
+  .garden-prose td {
+    padding: 0.95rem 1.15rem;
+    line-height: 1.8;
+    vertical-align: top;
+  }
+
+  .garden-prose th {
+    font-weight: 700;
+  }
+
+  .garden-prose tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--garden-panel) 42%, white);
+  }
+
+  .dark .garden-prose thead {
+    background: color-mix(in srgb, var(--garden-accent) 14%, rgb(15 23 42));
+  }
+
+  .garden-prose th,
+  .garden-prose td {
+    border-color: var(--garden-border);
+  }
+}
