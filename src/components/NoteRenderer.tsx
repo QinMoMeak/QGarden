@@ -78,7 +78,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
         />
       </div>
 
-      <div className="mx-auto flex max-w-[84rem] justify-center px-6 xl:pr-4">
+      <div className="mx-auto flex max-w-[84rem] justify-center px-6">
         <div className="flex-1 max-w-3xl py-12 md:py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <header className="mb-12">
             <div className="flex items-center justify-between mb-8">
@@ -194,8 +194,9 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
           </footer>
         </div>
 
-        {/* Desktop Sidebar TOC */}
-        <TableOfContents headings={headingDefinitions} />
+        <aside className="hidden xl:block w-64 shrink-0 pl-10">
+          <TableOfContents headings={headingDefinitions} />
+        </aside>
       </div>
     </div>
   );

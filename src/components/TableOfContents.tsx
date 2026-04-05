@@ -6,6 +6,13 @@ interface TableOfContentsProps {
   headings: ParsedHeading[];
 }
 
+function formatTocText(text: string) {
+  return text
+    .replace(/^【(.+?)】/, '$1')
+    .replace(/[（(].*?[）)]$/, '')
+    .trim();
+}
+
 export const TableOfContents: React.FC<TableOfContentsProps> = ({ headings }) => {
   const [activeId, setActiveId] = useState<string>('');
 
@@ -15,87 +22,112 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ headings }) =>
       return;
     }
 
-    const getCurrentHeading = () => {
-      const viewportAnchor = 180;
-      const visibleCandidates: Array<{ id: string; level: number; top: number }> = [];
-      const passedCandidates: Array<{ id: string; level: number; top: number }> = [];
+    const headingElements = headings
+      .map((heading) => document.getElementById(heading.id))
+      .filter(Boolean) as HTMLElement[];
 
-      headings.forEach((heading) => {
-        const el = document.getElementById(heading.id);
-        if (!el) return;
+    if (headingElements.length === 0) {
+      setActiveId('');
+      return;
+    }
 
-        const rect = el.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
+    const updateActiveHeading = () => {
+      const inView = headingElements
+        .map((element) => ({
+          id: element.id,
+          top: element.getBoundingClientRect().top,
+          bottom: element.getBoundingClientRect().bottom,
+        }))
+        .filter((entry) => entry.top <= 180 && entry.bottom > 0)
+        .sort((a, b) => b.top - a.top);
 
-        if (rect.top <= viewportAnchor && rect.bottom > 0) {
-          visibleCandidates.push({ id: heading.id, level: heading.level, top: rect.top });
-        }
-
-        if (absoluteTop <= window.scrollY + viewportAnchor) {
-          passedCandidates.push({ id: heading.id, level: heading.level, top: absoluteTop });
-        }
-      });
-
-      if (visibleCandidates.length > 0) {
-        visibleCandidates.sort((a, b) => {
-          if (b.level !== a.level) return b.level - a.level;
-          return Math.abs(a.top) - Math.abs(b.top);
-        });
-        setActiveId(visibleCandidates[0].id);
+      if (inView[0]?.id) {
+        setActiveId(inView[0].id);
         return;
       }
 
-      if (passedCandidates.length > 0) {
-        passedCandidates.sort((a, b) => {
-          if (b.top !== a.top) return b.top - a.top;
-          return b.level - a.level;
-        });
-        setActiveId(passedCandidates[0].id);
-        return;
-      }
+      const upcoming = headingElements
+        .map((element) => ({
+          id: element.id,
+          top: element.getBoundingClientRect().top,
+        }))
+        .filter((entry) => entry.top > 0)
+        .sort((a, b) => a.top - b.top);
 
-      setActiveId(headings[0]?.id ?? '');
+      setActiveId(upcoming[0]?.id ?? headings[0]?.id ?? '');
     };
 
-    getCurrentHeading();
-    window.addEventListener('scroll', getCurrentHeading, { passive: true });
-    window.addEventListener('resize', getCurrentHeading);
+    const observer = new IntersectionObserver(updateActiveHeading, {
+      rootMargin: '-20% 0px -65% 0px',
+      threshold: [0, 0.1, 0.25, 0.5, 1],
+    });
+
+    headingElements.forEach((element) => observer.observe(element));
+    updateActiveHeading();
+    window.addEventListener('resize', updateActiveHeading);
 
     return () => {
-      window.removeEventListener('scroll', getCurrentHeading);
-      window.removeEventListener('resize', getCurrentHeading);
+      observer.disconnect();
+      window.removeEventListener('resize', updateActiveHeading);
     };
   }, [headings]);
 
   if (headings.length === 0) return null;
 
+  const scrollToHeading = (id: string) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    const headerOffset = 96;
+    const top = element.getBoundingClientRect().top + window.scrollY - headerOffset;
+
+    window.scrollTo({
+      top,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <nav className="scrollbar-hidden fixed right-6 top-24 z-30 hidden max-h-[calc(100vh-7.5rem)] w-44 overflow-y-auto rounded-2xl border border-slate-200/70 bg-white/88 p-4 shadow-[0_18px_50px_-30px_rgba(15,23,42,0.18)] backdrop-blur-md xl:block dark:border-slate-800/80 dark:bg-slate-950/78 dark:shadow-[0_24px_60px_-34px_rgba(2,6,23,0.78)]">
-      <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">目录</h4>
-      <ul className="space-y-3">
-        {headings.map((heading) => (
-          <li 
-            key={heading.id}
-            style={{ paddingLeft: `${(heading.level - 1) * 12}px` }}
-          >
-            <a
-              href={`#${heading.id}`}
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById(heading.id)?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={cn(
-                "text-sm transition-all duration-200 block border-l-2 py-0.5 pl-3",
-                activeId === heading.id
-                  ? "text-indigo-600 dark:text-indigo-400 border-indigo-600 dark:border-indigo-400 font-medium"
-                  : "text-slate-400 dark:text-slate-500 border-transparent hover:text-slate-600 dark:hover:text-slate-300 hover:border-slate-200 dark:hover:border-slate-700"
-              )}
-            >
-              {heading.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <div className="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <nav aria-label="文章目录" className="scrollbar-hidden text-sm">
+        <div className="mb-3 text-xs font-medium tracking-[0.18em] text-slate-400 dark:text-slate-500">
+          目录
+        </div>
+        <ul className="space-y-1 border-l border-slate-200/80 pl-3 dark:border-slate-800/80">
+          {headings.map((heading) => {
+            const isActive = activeId === heading.id;
+
+            return (
+              <li
+                key={heading.id}
+                className={cn(
+                  heading.level === 1 && 'pl-0',
+                  heading.level === 2 && 'pl-3',
+                  heading.level === 3 && 'pl-6'
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => scrollToHeading(heading.id)}
+                  className={cn(
+                    'relative block w-full truncate py-1 text-left transition-colors duration-200',
+                    heading.level === 1 && 'text-[0.95rem] font-medium',
+                    heading.level === 3 && 'text-[13px]',
+                    isActive
+                      ? 'font-medium text-slate-900 dark:text-slate-100'
+                      : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
+                  )}
+                >
+                  {isActive && (
+                    <span className="absolute -left-3 top-1/2 h-5 w-px -translate-y-1/2 bg-slate-700 dark:bg-slate-200" />
+                  )}
+                  {formatTocText(heading.text)}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </div>
   );
 };
