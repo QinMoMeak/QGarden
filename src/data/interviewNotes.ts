@@ -1,8 +1,10 @@
 import { Note } from '../types';
+import { generatedInterviewModules } from '../generated/interview-content.generated';
 
 export const INTERVIEW_CATEGORY = '面试';
 const INTERVIEW_ROOT_PREFIX = 'interviews';
 const FALLBACK_UPDATED_AT = '2024-03-22T09:00:00Z';
+const MAX_URL_SLUG_LENGTH = 32;
 
 type Frontmatter = {
   title?: string;
@@ -12,12 +14,6 @@ type Frontmatter = {
   coverImage?: string;
 };
 
-const interviewModules = import.meta.glob('../content/interviews/**/*.md', {
-  eager: true,
-  query: '?raw',
-  import: 'default',
-}) as Record<string, string>;
-
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -25,6 +21,37 @@ function slugify(value: string) {
     .replace(/[^a-z0-9\u4e00-\u9fa5/_-]+/g, '-')
     .replace(/-+/g, '-')
     .replace(/(^-|-$)/g, '');
+}
+
+function slugifyForUrl(value: string) {
+  const normalized = value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return normalized || 'note';
+}
+
+function hashString(value: string) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return (hash >>> 0).toString(36);
+}
+
+function createStableInterviewId(relativePathWithoutExtension: string, title: string, fileName: string) {
+  const slugSource = slugifyForUrl(fileName) || slugifyForUrl(title);
+  const shortSlug = slugSource.slice(0, MAX_URL_SLUG_LENGTH) || 'note';
+  const hash = hashString(relativePathWithoutExtension).slice(0, 8);
+
+  return `iv-${shortSlug}-${hash}`;
 }
 
 function parseTags(rawValue: string) {
@@ -95,8 +122,7 @@ function extractFolderTags(relativeSegments: string[]) {
 }
 
 function createInterviewNote(filePath: string, raw: string): Note {
-  const normalizedPath = filePath.replace(/\\/g, '/');
-  const relativePath = normalizedPath.split('/content/interviews/')[1] ?? normalizedPath;
+  const relativePath = filePath.replace(/\\/g, '/');
   const relativePathWithoutExtension = relativePath.replace(/\.md$/i, '');
   const segments = relativePathWithoutExtension.split('/').filter(Boolean);
   const fileName = segments.at(-1) ?? relativePathWithoutExtension;
@@ -105,7 +131,7 @@ function createInterviewNote(filePath: string, raw: string): Note {
   const tags = Array.from(new Set([...(data.tags ?? []), ...extractFolderTags(segments)]));
 
   return {
-    id: `interview-${slugify(relativePathWithoutExtension)}`,
+    id: createStableInterviewId(relativePathWithoutExtension, title, fileName),
     title,
     content,
     path: `${INTERVIEW_ROOT_PREFIX}/${relativePathWithoutExtension}`,
@@ -116,9 +142,9 @@ function createInterviewNote(filePath: string, raw: string): Note {
   };
 }
 
-export const INTERVIEW_VAULT_NOTES: Note[] = Object.entries(interviewModules)
-  .filter(([filePath]) => !filePath.split('/').some((segment) => segment.startsWith('_')))
-  .map(([filePath, raw]) => createInterviewNote(filePath, raw))
+export const INTERVIEW_VAULT_NOTES: Note[] = generatedInterviewModules
+  .filter(({ filePath }) => !filePath.split('/').some((segment) => segment.startsWith('_')))
+  .map(({ filePath, raw }) => createInterviewNote(filePath, raw))
   .sort((left, right) => left.path.localeCompare(right.path, 'zh-CN'));
 
 export function isInterviewVaultNote(note: Note) {

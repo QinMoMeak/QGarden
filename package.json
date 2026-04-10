@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "generate:interviews": "node scripts/generate-interview-manifest.mjs",
+    "predev": "npm run generate:interviews",
+    "prebuild": "npm run generate:interviews",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",

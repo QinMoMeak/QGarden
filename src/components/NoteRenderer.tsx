@@ -9,6 +9,106 @@ import { Calendar, Tag, Clock, ArrowLeft, ArrowRight, Share2, Bookmark } from 'l
 import { TableOfContents } from './TableOfContents';
 import { SAMPLE_NOTES } from '../data/notes';
 import { extractMarkdownHeadings, slugifyHeading } from '../lib/headings';
+import { generatedInterviewResourceMap } from '../generated/interview-content.generated';
+
+const IMAGE_FILE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)$/i;
+
+function joinBaseUrl(relativePath: string) {
+  return `${import.meta.env.BASE_URL}${relativePath.replace(/^\/+/, '')}`;
+}
+
+function normalizeAssetPath(value: string) {
+  return value
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/^\.\//, '')
+    .replace(/^\/+/, '');
+}
+
+function resolveNoteAssetUrl(note: Note, assetPath: string) {
+  const normalizedAssetPath = normalizeAssetPath(assetPath);
+
+  if (!normalizedAssetPath) {
+    return '';
+  }
+
+  if (/^(https?:)?\/\//i.test(normalizedAssetPath) || normalizedAssetPath.startsWith('data:')) {
+    return normalizedAssetPath;
+  }
+
+  if (!note.path.startsWith('interviews/')) {
+    return normalizedAssetPath;
+  }
+
+  const noteRelativePath = note.path.replace(/^interviews\//, '');
+  const noteDirectory = noteRelativePath.includes('/')
+    ? noteRelativePath.slice(0, noteRelativePath.lastIndexOf('/'))
+    : '';
+  const candidateKeys = Array.from(new Set([
+    normalizedAssetPath,
+    noteDirectory ? `${noteDirectory}/${normalizedAssetPath}` : normalizedAssetPath,
+  ]));
+
+  for (const candidateKey of candidateKeys) {
+    const mappedPath = generatedInterviewResourceMap[candidateKey];
+
+    if (mappedPath) {
+      return joinBaseUrl(mappedPath);
+    }
+  }
+
+  return normalizedAssetPath.startsWith('_resources/')
+    ? ''
+    : normalizedAssetPath;
+}
+
+function isEmbeddedImageTarget(target: string) {
+  const normalizedTarget = normalizeAssetPath(target.split('|')[0] ?? '');
+  return IMAGE_FILE_EXTENSION_PATTERN.test(normalizedTarget) || normalizedTarget.includes('_resources/');
+}
+
+function processContent(content: string, note: Note) {
+  const lines = content.split('\n');
+  const processedLines: string[] = [];
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    if (/^\s*```/.test(line)) {
+      inCodeBlock = !inCodeBlock;
+      processedLines.push(line);
+      continue;
+    }
+
+    if (inCodeBlock) {
+      processedLines.push(line);
+      continue;
+    }
+
+    let processedLine = line.replace(/!\[\[([^[\]]+)\]\]/g, (match, rawTarget) => {
+      if (!isEmbeddedImageTarget(rawTarget)) {
+        return match;
+      }
+
+      const [assetTarget, altText] = rawTarget.split('|');
+      const resolvedAssetUrl = resolveNoteAssetUrl(note, assetTarget);
+
+      if (!resolvedAssetUrl) {
+        return match;
+      }
+
+      const fallbackAltText = normalizeAssetPath(assetTarget).split('/').at(-1)?.replace(/\.[^.]+$/, '') ?? 'image';
+      return `![${(altText ?? fallbackAltText).trim()}](${resolvedAssetUrl})`;
+    });
+
+    processedLine = processedLine.replace(/(?<!!)\[\[(.*?)\]\]/g, (match, rawTarget) => {
+      return `[${rawTarget}](#)`;
+    });
+
+    processedLines.push(processedLine);
+  }
+
+  return processedLines.join('\n');
+}
 
 interface NoteRendererProps {
   note: Note;
@@ -28,14 +128,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Simple wikilink replacement: [[Link Name]] -> [Link Name](#)
-  const processContent = (content: string) => {
-    return content.replace(/\[\[(.*?)\]\]/g, (match, p1) => {
-      return `[${p1}](#)`;
-    });
-  };
-
-  const processedContent = useMemo(() => processContent(note.content), [note.content]);
+  const processedContent = useMemo(() => processContent(note.content, note), [note.content, note]);
   const headingDefinitions = useMemo(() => extractMarkdownHeadings(processedContent), [processedContent]);
 
   const HeadingRenderer = ({
@@ -62,6 +155,15 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
     h1: ({node, ...props}) => <HeadingRenderer level={1} node={node as { position?: { start?: { line?: number } } }} {...props} />,
     h2: ({node, ...props}) => <HeadingRenderer level={2} node={node as { position?: { start?: { line?: number } } }} {...props} />,
     h3: ({node, ...props}) => <HeadingRenderer level={3} node={node as { position?: { start?: { line?: number } } }} {...props} />,
+    img: ({ src, alt, ...props }) => {
+      const resolvedSrc = src ? resolveNoteAssetUrl(note, src) : '';
+
+      if (!resolvedSrc) {
+        return null;
+      }
+
+      return <img src={resolvedSrc} alt={alt ?? ''} referrerPolicy="no-referrer" {...props} />;
+    },
   };
 
   const relatedNotes = SAMPLE_NOTES
@@ -98,7 +200,7 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
             {note.coverImage && (
               <div className="mb-8 overflow-hidden rounded-[2rem] border border-slate-200/70 bg-slate-100 shadow-[0_24px_60px_-32px_rgba(15,23,42,0.35)] dark:border-slate-800 dark:bg-slate-900">
                 <img
-                  src={note.coverImage}
+                  src={resolveNoteAssetUrl(note, note.coverImage)}
                   alt={`${note.title} cover`}
                   className="h-full max-h-[28rem] min-h-56 w-full object-cover"
                   referrerPolicy="no-referrer"
