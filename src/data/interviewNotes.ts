@@ -9,6 +9,7 @@ const MAX_URL_SLUG_LENGTH = 32;
 type Frontmatter = {
   title?: string;
   tags?: string[];
+  aliases?: string[];
   date?: string;
   updated?: string;
   coverImage?: string;
@@ -73,6 +74,24 @@ function parseTags(rawValue: string) {
     .filter(Boolean);
 }
 
+function parseYamlListValue(rawValue: string) {
+  const trimmed = rawValue.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    return trimmed
+      .slice(1, -1)
+      .split(',')
+      .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
+      .filter(Boolean);
+  }
+
+  return [trimmed.replace(/^['"]|['"]$/g, '')].filter(Boolean);
+}
+
 function parseFrontmatter(raw: string): { data: Frontmatter; content: string } {
   if (!raw.startsWith('---')) {
     return { data: {}, content: raw.trim() };
@@ -86,20 +105,42 @@ function parseFrontmatter(raw: string): { data: Frontmatter; content: string } {
   const block = raw.slice(3, endIndex).trim();
   const content = raw.slice(endIndex + 4).trim();
   const data: Frontmatter = {};
+  let activeListKey: 'tags' | 'aliases' | null = null;
 
   for (const line of block.split('\n')) {
+    const listItemMatch = line.match(/^\s*-\s+(.*)$/);
+
+    if (listItemMatch && activeListKey) {
+      const nextValue = listItemMatch[1].trim().replace(/^['"]|['"]$/g, '');
+
+      if (nextValue) {
+        data[activeListKey] = [...(data[activeListKey] ?? []), nextValue];
+      }
+
+      continue;
+    }
+
     const separatorIndex = line.indexOf(':');
     if (separatorIndex === -1) continue;
 
     const key = line.slice(0, separatorIndex).trim();
     const value = line.slice(separatorIndex + 1).trim();
 
-    if (!value) continue;
-
     if (key === 'tags') {
-      data.tags = parseTags(value);
+      data.tags = value ? parseTags(value) : [];
+      activeListKey = 'tags';
       continue;
     }
+
+    if (key === 'aliases') {
+      data.aliases = value ? parseYamlListValue(value) : [];
+      activeListKey = 'aliases';
+      continue;
+    }
+
+    activeListKey = null;
+
+    if (!value) continue;
 
     if (key === 'title' || key === 'date' || key === 'updated' || key === 'coverImage') {
       data[key] = value.replace(/^['"]|['"]$/g, '');
@@ -129,10 +170,12 @@ function createInterviewNote(filePath: string, raw: string): Note {
   const { data, content } = parseFrontmatter(raw);
   const title = data.title || extractTitle(content, fileName);
   const tags = Array.from(new Set([...(data.tags ?? []), ...extractFolderTags(segments)]));
+  const aliases = Array.from(new Set((data.aliases ?? []).map((item) => item.trim()).filter(Boolean)));
 
   return {
     id: createStableInterviewId(relativePathWithoutExtension, title, fileName),
     title,
+    aliases,
     content,
     path: `${INTERVIEW_ROOT_PREFIX}/${relativePathWithoutExtension}`,
     tags,

@@ -12,6 +12,7 @@ import { extractMarkdownHeadings, slugifyHeading } from '../lib/headings';
 import { generatedInterviewResourceMap } from '../generated/interview-content.generated';
 
 const IMAGE_FILE_EXTENSION_PATTERN = /\.(avif|bmp|gif|heic|heif|jpe?g|png|svg|webp)$/i;
+const INTERNAL_NOTE_PROTOCOL = 'qgarden-note:';
 
 function joinBaseUrl(relativePath: string) {
   return `${import.meta.env.BASE_URL}${relativePath.replace(/^\/+/, '')}`;
@@ -101,7 +102,15 @@ function processContent(content: string, note: Note) {
     });
 
     processedLine = processedLine.replace(/(?<!!)\[\[(.*?)\]\]/g, (match, rawTarget) => {
-      return `[${rawTarget}](#)`;
+      const [noteTarget, customLabel] = rawTarget.split('|');
+      const normalizedTarget = (noteTarget ?? '').trim();
+      const label = (customLabel ?? normalizedTarget).trim();
+
+      if (!normalizedTarget || !label) {
+        return match;
+      }
+
+      return `[${label}](${INTERNAL_NOTE_PROTOCOL}${encodeURIComponent(normalizedTarget)})`;
     });
 
     processedLines.push(processedLine);
@@ -113,6 +122,25 @@ function processContent(content: string, note: Note) {
 interface NoteRendererProps {
   note: Note;
   onNoteSelect: (id: string) => void;
+}
+
+function normalizeWikiLookupValue(value: string) {
+  return value
+    .trim()
+    .replace(/\\/g, '/')
+    .replace(/\.md$/i, '')
+    .replace(/^\/+|\/+$/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function decodeInternalNoteTarget(href: string) {
+  const encodedTarget = href.slice(INTERNAL_NOTE_PROTOCOL.length);
+
+  try {
+    return decodeURIComponent(encodedTarget);
+  } catch {
+    return encodedTarget;
+  }
 }
 
 export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }) => {
@@ -130,6 +158,35 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
 
   const processedContent = useMemo(() => processContent(note.content, note), [note.content, note]);
   const headingDefinitions = useMemo(() => extractMarkdownHeadings(processedContent), [processedContent]);
+  const noteLookup = useMemo(() => {
+    const normalizedCurrentNoteId = normalizeWikiLookupValue(note.id);
+    const normalizedCurrentNoteTitle = normalizeWikiLookupValue(note.title);
+
+    return {
+      findByWikiTarget(target: string) {
+        const normalizedTarget = normalizeWikiLookupValue(target.split('#')[0] ?? '');
+
+        if (!normalizedTarget) {
+          return null;
+        }
+
+        const byId = SAMPLE_NOTES.find((item) => normalizeWikiLookupValue(item.id) === normalizedTarget);
+        if (byId) return byId;
+
+        const byTitle = SAMPLE_NOTES.find((item) => normalizeWikiLookupValue(item.title) === normalizedTarget);
+        if (byTitle) return byTitle;
+
+        const byAlias = SAMPLE_NOTES.find((item) => item.aliases?.some((alias) => normalizeWikiLookupValue(alias) === normalizedTarget));
+        if (byAlias) return byAlias;
+
+        if (normalizedTarget === normalizedCurrentNoteId || normalizedTarget === normalizedCurrentNoteTitle) {
+          return note;
+        }
+
+        return null;
+      },
+    };
+  }, [note]);
 
   const HeadingRenderer = ({
     level,
@@ -163,6 +220,30 @@ export const NoteRenderer: React.FC<NoteRendererProps> = ({ note, onNoteSelect }
       }
 
       return <img src={resolvedSrc} alt={alt ?? ''} referrerPolicy="no-referrer" {...props} />;
+    },
+    a: ({ href, children, ...props }) => {
+      if (href?.startsWith(INTERNAL_NOTE_PROTOCOL)) {
+        const wikiTarget = decodeInternalNoteTarget(href);
+        const matchedNote = noteLookup.findByWikiTarget(wikiTarget);
+
+        return (
+          <a
+            href={matchedNote ? '#' : undefined}
+            onClick={(event) => {
+              event.preventDefault();
+
+              if (matchedNote) {
+                onNoteSelect(matchedNote.id);
+              }
+            }}
+            {...props}
+          >
+            {children}
+          </a>
+        );
+      }
+
+      return <a href={href} {...props}>{children}</a>;
     },
   };
 

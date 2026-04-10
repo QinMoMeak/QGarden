@@ -1,6 +1,7 @@
 export interface Note {
   id: string;
   title: string;
+  aliases?: string[];
   content: string;
   path: string;
   tags: string[];
