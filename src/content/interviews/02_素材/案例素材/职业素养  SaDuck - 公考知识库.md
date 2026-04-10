@@ -1,5 +1,6 @@
 ---
-title: "职业素养 | SaDuck - 公考知识库"
+short_title: "职业素养  SaDuck - 公考知识库"
+title: "职业素养  SaDuck - 公考知识库"
 source: "https://www.saduck.top/%E4%B8%93%E4%B8%9A/%E5%85%AC%E5%AE%89/%E8%81%8C%E4%B8%9A%E7%B4%A0%E5%85%BB.html"
 author:
   - "saduck"
@@ -13,6 +14,7 @@ tags:
   - "会议精神"
 是否整理: false
 ---
+
 # 职业素养
 
 **一、人民警察的政治素质**

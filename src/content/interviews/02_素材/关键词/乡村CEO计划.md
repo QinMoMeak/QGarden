@@ -1,4 +1,6 @@
 ---
+short_title: "乡村CEO计划"
+title: "乡村CEO计划"
 type: 素材
 source_type: 案例素材
 tags:
@@ -9,6 +11,7 @@ tags:
 Created: 2026-02-20 14:20:10
 Updated: 2026-03-01 23:26:57
 ---
+
 
 # 乡村CEO计划
 ## 摘要
