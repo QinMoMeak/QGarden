@@ -144,7 +144,6 @@
   .garden-prose h5,
   .garden-prose h6 {
     color: var(--garden-heading);
-    scroll-margin-top: 96px;
   }
 
   .garden-prose h2 {
